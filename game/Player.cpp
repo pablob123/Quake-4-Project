@@ -9040,11 +9040,13 @@ void idPlayer::Move( void ) {
  		pfl.onGround	= ( influenceActive == INFLUENCE_LEVEL2 );
 		pfl.onLadder	= false;
 		pfl.jump		= false;
+		pfl.longJump	= false;
 	} else {
 		pfl.crouch	= physicsObj.IsCrouching();
 		pfl.onGround	= physicsObj.HasGroundContacts();
 		pfl.onLadder	= physicsObj.OnLadder();
 		pfl.jump		= physicsObj.HasJumped();
+		pfl.longJump	= physicsObj.HasJumped();
 
  		// check if we're standing on top of a monster and give a push if we are
  		idEntity *groundEnt = physicsObj.GetGroundEntity();
@@ -9081,6 +9083,11 @@ void idPlayer::Move( void ) {
  			StartSound( "snd_stepladder", SND_CHANNEL_ANY, 0, false, NULL );
 		}
 	}
+
+	//working on long jump code here
+
+
+	//
 
 	UpdateIntentDir( );
 
