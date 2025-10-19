@@ -69,6 +69,7 @@ float idPhysics_Player::CmdScale( const usercmd_t &cmd ) const {
 	int		forwardmove;
 	int		rightmove;
 	int		upmove;
+	int		downmove;
 
 	forwardmove = cmd.forwardmove;
 	rightmove = cmd.rightmove;
@@ -632,19 +633,42 @@ idPhysics_Player::AirMove
 ===================
 */
 void idPhysics_Player::AirMove( void ) {
+	idVec3		addVelocity;
 	idVec3		wishvel;
 	idVec3		wishdir;
+	idVec3		horizontalVel;
 	float		wishspeed;
 	float		scale;
 
 // RAVEN BEGIN
 // bdube: crouch time
 	// if the player isnt pressing crouch and heading down then accumulate slide time
+
 	if ( command.upmove >= 0 && current.velocity * gravityNormal > 0 ) {	
 		current.crouchSlideTime += framemsec * 2;
 		if ( current.crouchSlideTime > 2000 ) {
 			current.crouchSlideTime = 2000;
 		}
+		if (command.upmove >= 20) {
+			addVelocity = 3.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity -= addVelocity;
+			if (groundPlane == true) {
+				current.velocity *= 0;
+			}
+		}
+		// Aerial Dive Jump
+		if (command.upmove >= 20 && command.forwardmove > 10) {
+			// not holding jump
+			horizontalVel = 300.0f * viewForward;
+			//horizontalVel *= idMath::Sqrt(horizontalVel.Normalize());
+			addVelocity = 3.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity += (horizontalVel + addVelocity);
+		}
+		//else if (0 < command.upmove < 20) {
+		//}
+		
 	}
 // RAVEN END
 
@@ -699,12 +723,19 @@ void idPhysics_Player::WalkMove( void ) {
 	}
 
 	if ( idPhysics_Player::CheckJump() ) {
+		idVec3 addVelocity;
 		// jumped away
 		if ( waterLevel > WATERLEVEL_FEET ) {
 			idPhysics_Player::WaterMove();
 		}
 		else {
 			idPhysics_Player::AirMove();
+
+			//if (command.upmove >= 10) {
+			//	addVelocity = 3.0f * maxJumpHeight * -gravityVector;
+			//	addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			//	current.velocity -= addVelocity;
+			//}
 		}
 		return;
 	}
@@ -1143,6 +1174,7 @@ Sets clip model size
 void idPhysics_Player::CheckDuck( void ) {
 	trace_t	trace;
 	idVec3 end;
+	idVec3 addVelocity;
 	idBounds bounds;
 	float maxZ;
 
@@ -1157,7 +1189,16 @@ void idPhysics_Player::CheckDuck( void ) {
 			// stand up if possible
 			if ( current.movementFlags & PMF_DUCKED ) {
 				// try to stand up
-				end = current.origin - ( pm_normalheight.GetFloat() - pm_crouchheight.GetFloat() ) * gravityNormal;
+				
+				if (command.upmove > 10) {
+					
+					addVelocity = 5.0f * maxJumpHeight * -gravityVector;
+					addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+					current.velocity += addVelocity;
+					end = current.origin - (pm_normalheight.GetFloat() - pm_crouchheight.GetFloat()) * gravityNormal;
+				}
+				//end = current.origin - (pm_normalheight.GetFloat() - pm_crouchheight.GetFloat()) * gravityNormal;
+
 // RAVEN BEGIN
 // ddynerman: multiple clip worlds
 				gameLocal.Translation( self, trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
@@ -1273,6 +1314,7 @@ idPhysics_Player::CheckJump
 */
 bool idPhysics_Player::CheckJump( void ) {
 	idVec3 addVelocity;
+	idVec3 horizontalVel;
 
 	if ( command.upmove < 10 ) {
 		// not holding jump
@@ -1284,18 +1326,58 @@ bool idPhysics_Player::CheckJump( void ) {
 		return false;
 	}
 
-	// don't jump if we can't stand up
-	if ( current.movementFlags & PMF_DUCKED ) {
-		return false;
+	// Crouch Jump
+	if ( current.movementFlags & PMF_DUCKED && command.upmove < 10) {
+		addVelocity = 1.0f * maxJumpHeight * -gravityVector;
+		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+		current.velocity += addVelocity;
+
+		//return false;
+	}
+	//Dive Jump
+	else if (command.upmove > 30 && command.forwardmove > 10) {
+		// not holding jump
+		horizontalVel = 700.0f * viewForward;
+		//horizontalVel *= idMath::Sqrt(horizontalVel.Normalize());
+		addVelocity = 3.0f * maxJumpHeight * -gravityVector;
+		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+		current.velocity += (horizontalVel + addVelocity);
+	}
+	//	Triple Jump
+	else {
+		if (jumpCount < 2) {
+			tripleJumpTime = gameLocal.time;
+			addVelocity = 5.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity += addVelocity;
+			
+			jumpCount += 1;
+			//gameLocal.Printf("%d\n", jumpCount);
+		}
+		else if(jumpCount == 2 && gameLocal.time - tripleJumpTime <= 2000){
+			addVelocity = 20.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity += addVelocity;
+			jumpCount = 0;
+		}
+		else {
+			addVelocity = 5.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity += addVelocity;
+			jumpCount = 0;
+		}
+		
+		
+		//current.velocity += addVelocity;
 	}
 
 	groundPlane = false;		// jumping away
 	walking = false;
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
 
-	addVelocity = 2.0f * maxJumpHeight * -gravityVector;
-	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
-	current.velocity += addVelocity;
+	//addVelocity = 5.0f * maxJumpHeight * -gravityVector;
+	//addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
+	//current.velocity += addVelocity;
 
 // RAVEN BEGIN
 // bdube: crouch slide, nick maggoire is awesome
@@ -1652,6 +1734,8 @@ bool idPhysics_Player::OnLadder( void ) const {
 	return ladder;
 }
 
+
+
 /*
 ================
 idPhysics_Player::idPhysics_Player
@@ -1667,6 +1751,8 @@ idPhysics_Player::idPhysics_Player( void ) {
 	crouchSpeed = 0;
 	maxStepHeight = 0;
 	maxJumpHeight = 0;
+	jumpCount = 0;
+	tripleJumpTime = 0;
 	memset( &command, 0, sizeof( command ) );
 	viewAngles.Zero();
 	framemsec = 0;

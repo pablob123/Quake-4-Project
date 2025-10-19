@@ -130,6 +130,8 @@ private:
 	float					maxStepHeight;
 	float					maxJumpHeight;
 	int						debugLevel;				// if set, diagnostic output will be printed
+	int						jumpCount;
+	int						tripleJumpTime;
 
 	// player input
 	usercmd_t				command;
