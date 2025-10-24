@@ -11,3 +11,5 @@ New features added in the mod (So far):
 3. Press forwards and jump at the same time on the ground or in the air to perform a long jump.
 4. Hold the space button in midair to perform a ground pound.
 5. Jump while crouching to perform a higher jump.
+6. Changed grenade launcher and lightning gun
+7. Added new HUD element to display the name of the power up or F.L.U.D.D. nozzle you're using.
