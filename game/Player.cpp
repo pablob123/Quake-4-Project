@@ -3357,7 +3357,17 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 
 	inclip		= weapon->AmmoInClip();
 	ammoamount	= weapon->AmmoAvailable();
-
+	//_hud->SetStateInt("player_currentweapon", currentWeapon);
+	if (currentWeapon == 4) {
+		_hud->SetStateString("player_currentweapon", "Fire Flower");
+	}
+	else if (currentWeapon == 8) {
+		_hud->SetStateString("player_currentweapon", "Spray Nozzle");
+	}
+	else {
+		_hud->SetStateString("player_currentweapon", "None");
+	}
+	
 	if ( ammoamount < 0 ) {
 		// show infinite ammo
 		_hud->SetStateString( "player_ammo", "-1" );
@@ -14083,5 +14093,14 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 
 	return weaponNum;
 }
+
+idPhysics_Player idPlayer::PGetPhys() {
+	return physicsObj;
+}
+
+int idPlayer::GetWeapon() {
+	return currentWeapon;
+}
+
 
 // RITUAL END

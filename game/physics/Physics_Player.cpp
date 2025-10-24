@@ -639,7 +639,10 @@ void idPhysics_Player::AirMove( void ) {
 	idVec3		horizontalVel;
 	float		wishspeed;
 	float		scale;
-
+	int currWeapon = playerWeapon->GetCurrentWeapon();
+	//idPlayer* player ;
+	//int weapon = player->GetCurrentWeapon();
+	//int e = GetWeaponDef()
 // RAVEN BEGIN
 // bdube: crouch time
 	// if the player isnt pressing crouch and heading down then accumulate slide time
@@ -650,9 +653,11 @@ void idPhysics_Player::AirMove( void ) {
 			current.crouchSlideTime = 2000;
 		}
 		if (command.upmove >= 20) {
+			//gameLocal.Printf("%d\n", currWeapon);
 			addVelocity = 3.0f * maxJumpHeight * -gravityVector;
 			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 			current.velocity -= addVelocity;
+
 			if (groundPlane == true) {
 				current.velocity *= 0;
 			}
@@ -1335,7 +1340,7 @@ bool idPhysics_Player::CheckJump( void ) {
 		//return false;
 	}
 	//Dive Jump
-	else if (command.upmove > 30 && command.forwardmove > 10) {
+	else if (command.upmove > 30 && command.rightmove > 10) {
 		// not holding jump
 		horizontalVel = 700.0f * viewForward;
 		//horizontalVel *= idMath::Sqrt(horizontalVel.Normalize());
@@ -2392,4 +2397,9 @@ void idPhysics_Player::SetClipModelNoLink( idClipModel *model ) {
 		delete clipModel;
 	}
 	clipModel = model;
+}
+
+
+void idPhysics_Player::PSetPhys(playerPState_t setCurr) {
+	current = setCurr;
 }

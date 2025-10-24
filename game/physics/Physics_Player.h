@@ -47,6 +47,7 @@ typedef struct playerPState_s {
 // RAVEN BEGIN
 // bdube: crouch slide 
 	int						crouchSlideTime;
+
 // RAVEN END
 } playerPState_t;
 
@@ -78,6 +79,7 @@ public:
 	bool					IsCrouching( void ) const;
 	bool					OnLadder( void ) const;
 	const idVec3 &			PlayerGetOrigin( void ) const;	// != GetOrigin
+	void					PSetPhys(playerPState_t setCurr);
 
 public:	// common physics interface
 	bool					Evaluate( int timeStepMSec, int endTimeMSec );
@@ -119,10 +121,11 @@ public:	// common physics interface
 
 	void					SetClipModelNoLink( idClipModel *clip );
 
-private:
+public: //originally private
 	// player physics state
 	playerPState_t			current;
 	playerPState_t			saved;
+	idPlayer*				playerWeapon;
 
 	// properties
 	float					walkSpeed;

@@ -6,6 +6,7 @@
 #include "../client/ClientEffect.h"
 #include "../Projectile.h"
 #include "../ai/AI_Manager.h"
+//#include "../Physics/Physics_Player.h"
 
 const int	LIGHTNINGGUN_NUM_TUBES	=	3;
 const int	LIGHTNINGGUN_MAX_PATHS  =	3;
@@ -308,7 +309,7 @@ void rvWeaponLightningGun::Think ( void ) {
 	// Inflict damage on all targets being attacked
 	if ( !gameLocal.isClient && gameLocal.time >= nextAttackTime ) {
 		int    i;
-		float  power = 1.0f;
+		float  power = 0.1f;
 		idVec3 dir;
 		
 		owner->inventory.UseAmmo( ammoType, ammoRequired );

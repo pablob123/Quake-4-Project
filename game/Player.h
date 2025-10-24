@@ -257,6 +257,8 @@ public:
 	bool					UseAmmo( int index, int amount );
 	int						HasAmmo( const char *weapon_classname );			// looks up the ammo information for the weapon class first
 
+	
+
 	int						nextItemPickup;
 	int						nextItemNum;
 	int						onePickupTime;
@@ -279,6 +281,11 @@ public:
 		EVENT_EMOTE,
  		EVENT_MAXEVENTS
  	};
+	 
+
+	idPhysics_Player		PGetPhys();
+	int						GetWeapon();
+	
 
 	friend class idThread;
 
@@ -796,7 +803,7 @@ public:
 	void					SetCash( float newCashAmount );
 	void					ResetCash();
 // RITUAL END
-
+	idPhysics_Player		physicsObj;			// player physics
 protected:
 	void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );
 
@@ -806,7 +813,7 @@ private:
 	jointHandle_t			hipJoint;
 	jointHandle_t			chestJoint;
 
-	idPhysics_Player		physicsObj;			// player physics
+	
 
  	idList<aasLocation_t>	aasLocation;		// for AI tracking the player
 
@@ -1201,6 +1208,9 @@ ID_INLINE idAnimatedEntity* idPlayer::GetWeaponWorldModel( void ) const {
 ID_INLINE int idPlayer::GetCurrentWeapon( void ) const {
 	return currentWeapon;
 }
+//ID_INLINE void idPlayer::SetCurrentWeapon(int curr) {
+//	currentWeapon = curr;
+//}
 
 ID_INLINE bool idPlayer::IsGibbed( void ) const {
 	return gibDeath;

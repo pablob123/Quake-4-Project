@@ -427,6 +427,10 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 
 	
 			if ( gameLocal.time - fireHeldTime > chargeTime ) {	
+				//playerPState_t curr.velocity = owner.PGetPhys();
+				//owner->PGetPhys()->current;
+				//->current;//GetPlayerPhysics()->
+				
 				Attack ( true, 1, spread, 0, 1.0f );
 				PlayEffect ( "fx_chargedflash", barrelJointView, false );
 				PlayAnim( ANIMCHANNEL_ALL, "chargedfire", parms.blendFrames );
