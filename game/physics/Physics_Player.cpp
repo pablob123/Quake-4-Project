@@ -639,9 +639,10 @@ void idPhysics_Player::AirMove( void ) {
 	idVec3		horizontalVel;
 	float		wishspeed;
 	float		scale;
-	int currWeapon = playerWeapon->GetCurrentWeapon();
-	//idPlayer* player ;
-	//int weapon = player->GetCurrentWeapon();
+	//powerupJumpCount = 0;
+	//int currWeapon = playerWeapon->GetCurrentWeapon();
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	int weapon = player->GetCurrentWeapon();
 	//int e = GetWeaponDef()
 // RAVEN BEGIN
 // bdube: crouch time
@@ -652,8 +653,8 @@ void idPhysics_Player::AirMove( void ) {
 		if ( current.crouchSlideTime > 2000 ) {
 			current.crouchSlideTime = 2000;
 		}
-		if (command.upmove >= 20) {
-			//gameLocal.Printf("%d\n", currWeapon);
+		if (command.upmove >= 20 && weapon != 7) {
+			//gameLocal.Printf("%d\n", weapon);
 			addVelocity = 3.0f * maxJumpHeight * -gravityVector;
 			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 			current.velocity -= addVelocity;
@@ -662,8 +663,16 @@ void idPhysics_Player::AirMove( void ) {
 				current.velocity *= 0;
 			}
 		}
+		// Propellor Jump
+		if (command.upmove >= 20 && weapon == 5 && powerupJumpCount < 3) {
+			gameLocal.Printf("%d\n", powerupJumpCount);
+			powerupJumpCount += 1;
+			addVelocity = 40.0f * maxJumpHeight * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			current.velocity += addVelocity;
+		}
 		// Aerial Dive Jump
-		if (command.upmove >= 20 && command.forwardmove > 10) {
+		if (command.upmove >= 20 && command.forwardmove > 10 && weapon != 7) {
 			// not holding jump
 			horizontalVel = 300.0f * viewForward;
 			//horizontalVel *= idMath::Sqrt(horizontalVel.Normalize());
@@ -671,6 +680,7 @@ void idPhysics_Player::AirMove( void ) {
 			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 			current.velocity += (horizontalVel + addVelocity);
 		}
+
 		//else if (0 < command.upmove < 20) {
 		//}
 		
@@ -720,6 +730,9 @@ void idPhysics_Player::WalkMove( void ) {
 	float		accelerate;
 	idVec3		oldVelocity, vel;
 	float		oldVel, newVel;
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	int weapon = player->GetCurrentWeapon();
+
 
 	if ( waterLevel > WATERLEVEL_WAIST && ( viewForward * groundTrace.c.normal ) > 0.0f ) {
 		// begin swimming
@@ -763,7 +776,13 @@ void idPhysics_Player::WalkMove( void ) {
 	wishvel = viewForward * command.forwardmove + viewRight * command.rightmove;
 	wishdir = wishvel;
 	wishspeed = wishdir.Normalize();
-	wishspeed *= scale;
+	
+	if (weapon == 1) {
+		wishspeed *= scale * 10;
+	}
+	else {
+		wishspeed *= scale;
+	}
 
 	// clamp the speed lower if wading or walking on the bottom
 	if ( waterLevel ) {
@@ -1320,6 +1339,8 @@ idPhysics_Player::CheckJump
 bool idPhysics_Player::CheckJump( void ) {
 	idVec3 addVelocity;
 	idVec3 horizontalVel;
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	int weapon = player->GetCurrentWeapon();
 
 	if ( command.upmove < 10 ) {
 		// not holding jump
@@ -1347,6 +1368,22 @@ bool idPhysics_Player::CheckJump( void ) {
 		addVelocity = 3.0f * maxJumpHeight * -gravityVector;
 		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 		current.velocity += (horizontalVel + addVelocity);
+	}
+	//Rocket Nozzle Jump
+	else if (command.upmove >= 20 && weapon == 10 && (gameLocal.time - rocketJumpTime >= 7000 || rocketJumpTime == 0)) {
+		addVelocity = 100.0f * maxJumpHeight * -gravityVector;
+		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+		current.velocity += addVelocity;
+		rocketJumpTime = gameLocal.time;
+	}
+	//Hover Nozzle
+	else if (weapon == 7) {
+		tripleJumpTime = gameLocal.time;
+		//addVelocity += tripleJumpTime * -gravityVector;
+		//addVelocity *= idMath::Sqrt(addVelocity.Normalize());*/
+		//current.velocity += addVelocity;
+		//idPhysics_Player::Accelerate(addVelocity, 10.0, PM_FLYACCELERATE);
+		//FlyMove();
 	}
 	//	Triple Jump
 	else {
@@ -1652,6 +1689,7 @@ void idPhysics_Player::MovePlayer( int msec ) {
 	}
 	else if ( walking ) {
 		// walking on ground
+		powerupJumpCount = 0;
 		idPhysics_Player::WalkMove();
 	}
 	else {
@@ -1758,6 +1796,9 @@ idPhysics_Player::idPhysics_Player( void ) {
 	maxJumpHeight = 0;
 	jumpCount = 0;
 	tripleJumpTime = 0;
+	rocketJumpTime = 0;
+	toggleHover = false;
+	powerupJumpCount = 0;
 	memset( &command, 0, sizeof( command ) );
 	viewAngles.Zero();
 	framemsec = 0;

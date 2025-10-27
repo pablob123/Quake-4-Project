@@ -135,6 +135,9 @@ public: //originally private
 	int						debugLevel;				// if set, diagnostic output will be printed
 	int						jumpCount;
 	int						tripleJumpTime;
+	int						rocketJumpTime;
+	int						powerupJumpCount;
+	bool					toggleHover;
 
 	// player input
 	usercmd_t				command;

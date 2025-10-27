@@ -3361,8 +3361,20 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 	if (currentWeapon == 4) {
 		_hud->SetStateString("player_currentweapon", "Fire Flower");
 	}
+	else if (currentWeapon == 5) {
+		_hud->SetStateString("player_currentweapon", "Propellor");
+	}
+	else if (currentWeapon == 1) {
+		_hud->SetStateString("player_currentweapon", "Turbo Nozzle");
+	}
+	else if (currentWeapon == 7) {
+		_hud->SetStateString("player_currentweapon", "Hover Nozzle");
+	}
 	else if (currentWeapon == 8) {
 		_hud->SetStateString("player_currentweapon", "Spray Nozzle");
+	}
+	else if (currentWeapon == 10) {
+		_hud->SetStateString("player_currentweapon", "Rocket Nozzle");
 	}
 	else {
 		_hud->SetStateString("player_currentweapon", "None");
